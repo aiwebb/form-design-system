@@ -49,6 +49,7 @@ import CompanyCustomIcon from './CompanyCustomIcon';
 import CompeteIcon from './CompeteIcon';
 import ConferenceIcon from './ConferenceIcon';
 import CopyToIcon from './CopyToIcon';
+import CreditcardIcon from './CreditcardIcon';
 import CropIcon from './CropIcon';
 import DatePickerIcon from './DatePickerIcon';
 import DenyIcon from './DenyIcon';
@@ -103,6 +104,7 @@ import MailIcon from './MailIcon';
 import MarketMapIcon from './MarketMapIcon';
 import MenuCloseIcon from './MenuCloseIcon';
 import MenuOpenIcon from './MenuOpenIcon';
+import MicroscopeIcon from './MicroscopeIcon';
 import MinusIcon from './MinusIcon';
 import MoreIcon from './MoreIcon';
 import MoveIcon from './MoveIcon';
@@ -241,6 +243,7 @@ export {
   CompeteIcon,
   ConferenceIcon,
   CopyToIcon,
+  CreditcardIcon,
   CropIcon,
   DatePickerIcon,
   DenyIcon,
@@ -295,6 +298,7 @@ export {
   MarketMapIcon,
   MenuCloseIcon,
   MenuOpenIcon,
+  MicroscopeIcon,
   MinusIcon,
   MoreIcon,
   MoveIcon,

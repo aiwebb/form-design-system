@@ -3,6 +3,10 @@ import State from 'util/storybook-docs/State';
 import Button from 'components/Button';
 import { StoryObj } from '@storybook/react';
 import Popover, { PopoverProps } from '.';
+import DropdownButton from 'components/DropdownButton';
+import FlexItem from 'components/FlexItem';
+import Flex from 'components/Flex';
+import ComponentWithoutRef from './ComponentWithoutRef';
 
 export const Primary: StoryObj<PopoverProps> = {
   args: {
@@ -82,6 +86,9 @@ export const ControlledPopover: StoryObj<PopoverProps> = {
           interactionMode="controlled"
           isOpen={myIsOpen}
           distance={8}
+          onUserDismiss={() => {
+            setMyIsOpen(false);
+          }}
         >
           <div className="bgColor--white rounded--all elevation--2 padding--all">
             <h3 className="type--head3">Look at me</h3>
@@ -93,6 +100,58 @@ export const ControlledPopover: StoryObj<PopoverProps> = {
       )}
     />
   ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The "controlled" `interactionMode` follows the conventions of a [controlled component](https://reactjs.org/docs/forms.html#controlled-components), meaning the open state of the popover is exclusively controlled by the prop `isOpen`. To update the state of `isOpen` based on user interaction, you must use the `onUserDismiss` callback. The `onUserDismiss` function is invoked when 1. The user clicks the trigger element 2. The user presses `Escape` 3. the user clicks away from the popover. If you\'d like to disable scrolling of some element when a popover is open you can pass a ref of the scrolling element to the `disableScrollRef` prop.',
+      },
+    },
+  },
+};
+
+export const ControlledPopoverWithExternalTrigger: StoryObj<PopoverProps> = {
+  render: (args: PopoverProps): JSX.Element => {
+    return (
+      <State
+        initialValue={true}
+        render={(myIsOpen, setMyIsOpen) => (
+          <Flex>
+            <FlexItem>
+              <button
+                onClick={() => {
+                  setMyIsOpen(!myIsOpen);
+                }}
+              >
+                Open popover
+              </button>
+            </FlexItem>
+            <FlexItem>
+              <Popover
+                {...args}
+                trigger={<button>im the anchor</button>}
+                position="bottom"
+                alignment="start"
+                interactionMode="controlled"
+                isOpen={myIsOpen}
+                distance={8}
+                onUserDismiss={() => {
+                  setMyIsOpen(false);
+                }}
+              >
+                <div className="bgColor--white rounded--all elevation--2 padding--all">
+                  <h3 className="type--head3">Look at me</h3>
+                  <p>
+                    <em>i am the popover</em>
+                  </p>
+                </div>
+              </Popover>
+            </FlexItem>
+          </Flex>
+        )}
+      />
+    );
+  },
   parameters: {
     docs: {
       description: {
@@ -233,6 +292,60 @@ export const DisableScrolling: StoryObj<PopoverProps> = {
           "If you'd like to disable scrolling of some element when a popover is open you can pass a ref of the scrolling element to the `disableScrollRef` prop.",
       },
     },
+  },
+};
+
+export const WithDropdown = {
+  render: (args: PopoverProps): JSX.Element => {
+    const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
+    return (
+      <Popover
+        {...args}
+        trigger={
+          <DropdownButton>
+            {!isPopoverOpen ? 'Popover is closed' : 'Popover is open'}
+          </DropdownButton>
+        }
+        position="bottom"
+        alignment="start"
+        distance={8}
+        onOpen={() => {
+          setIsPopoverOpen(true);
+        }}
+        onClose={() => {
+          setIsPopoverOpen(false);
+        }}
+      >
+        <div className="bgColor--white rounded--all elevation--2 padding--all">
+          <h3 className="type--head3">Look at me</h3>
+          <p>
+            <em>i am the popover</em>
+          </p>
+        </div>
+      </Popover>
+    );
+  },
+};
+
+export const TriggerWithoutRef = {
+  render: (args: PopoverProps): JSX.Element => {
+    return (
+      <Popover
+        {...args}
+        trigger={<ComponentWithoutRef>{"I'm a trigger"}</ComponentWithoutRef>}
+        position="bottom"
+        alignment="start"
+        distance={8}
+      >
+        <div className="bgColor--white rounded--all elevation--2 padding--all">
+          <h3 className="type--head3">Look at me</h3>
+          <p>
+            <em>i am the popover</em>
+          </p>
+        </div>
+      </Popover>
+    );
   },
 };
 

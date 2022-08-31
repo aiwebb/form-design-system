@@ -90,27 +90,29 @@ export interface PopoverProps {
 const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(
   (
     {
-      interactionMode = 'click',
-      disablePortal,
-      position = 'bottom',
       alignment = 'start',
-      distance = 4,
-      delay = 0,
-      onUserDismiss = () => {},
-      onOpen = () => {},
-      onClose = () => {},
-      trigger,
       children,
-      isOpen = false,
-      transitionName,
-      disableScrollRef,
       closeOnScrollRef,
+      delay = 0,
+      disablePortal,
+      disableScrollRef,
+      distance = 4,
+      interactionMode = 'click',
+      isOpen = false,
+      onClose = () => {},
+      onOpen = () => {},
+      onUserDismiss = () => {},
+      position = 'bottom',
+      transitionName,
+      trigger,
     }: PopoverProps,
     forwardedRef
   ) => {
     const [isActive, setIsActive] = useState(isOpen);
     const refContent = forwardedRef || useRef<HTMLDivElement>(null);
-    useCloseOnScroll(closeOnScrollRef, isActive, () => setIsActive(false));
+    useCloseOnScroll(closeOnScrollRef, isActive, () => {
+      handleChange(false);
+    });
     useDisableScroll(disableScrollRef, isActive);
 
     const isHover = interactionMode === 'hover';
@@ -121,37 +123,38 @@ const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(
       setIsActive(isControlled && !!isOpen);
     }, [interactionMode, isOpen]);
 
-    let triggerProps: HTMLAttributes<HTMLElement> = {};
-    let hoverTimeout: number;
-    switch (interactionMode) {
-      case 'hover':
-        triggerProps.onMouseEnter = () => {
-          if (delay > 0) {
-            hoverTimeout = setTimeout(setIsActive, delay, true);
-          } else {
-            setIsActive(true);
-          }
-        };
-        triggerProps.onMouseLeave = () => {
-          if (hoverTimeout) {
-            clearTimeout(hoverTimeout);
-          }
-          setIsActive(false);
-        };
-        triggerProps.onClick = (e) => {
-          e.stopPropagation();
-          setIsActive(false);
-        };
-        triggerProps.tabIndex = 1;
-        break;
-      case 'click':
-        triggerProps.onClick = (e) => {
-          e.stopPropagation();
-          setIsActive(!isActive);
-        };
-        break;
-      default:
-        triggerProps = {};
+    const triggerProps: HTMLAttributes<HTMLElement> = {
+      style:
+        isActive && isControlled
+          ? { ...trigger.props.style, pointerEvents: 'none' }
+          : trigger.props.style,
+    };
+
+    let hoverTimeout: NodeJS.Timeout;
+    if (interactionMode === 'hover') {
+      triggerProps.onMouseEnter = () => {
+        if (delay > 0) {
+          hoverTimeout = setTimeout(handleChange, delay, true);
+        } else {
+          handleChange(true);
+        }
+      };
+      triggerProps.onMouseLeave = () => {
+        if (hoverTimeout) {
+          clearTimeout(hoverTimeout);
+        }
+        handleChange(false);
+      };
+      triggerProps.onClick = (e) => {
+        e.stopPropagation();
+        handleChange(false);
+      };
+      triggerProps.tabIndex = 1;
+    } else if (interactionMode === 'click') {
+      triggerProps.onClick = (e) => {
+        e.stopPropagation();
+        handleChange(!isActive);
+      };
     }
 
     const clonedTrigger = React.cloneElement(trigger, triggerProps);
@@ -162,8 +165,6 @@ const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(
 
     const popperContent = (
       <CSSTransition
-        onEntered={onOpen}
-        onExited={onClose}
         in={isActive}
         unmountOnExit={isHover}
         timeout={transitionName ? 200 : 0}
@@ -180,20 +181,20 @@ const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(
     );
 
     const handleChange = (open: boolean) => {
-      if (open) {
-        onOpen();
-      } else {
-        setIsActive(false);
-        onClose();
+      if (!isControlled) {
+        setIsActive(open);
+        if (open) {
+          onOpen();
+        } else {
+          onClose();
+        }
       }
     };
+
     return (
-      <RadixPopover.Root
-        open={isActive}
-        onOpenChange={!isControlled ? handleChange : undefined}
-      >
+      <RadixPopover.Root open={isActive} onOpenChange={handleChange}>
         <RadixPopover.Trigger asChild>
-          <div>{clonedTrigger}</div>
+          <div className="display--flex width--fit">{clonedTrigger}</div>
         </RadixPopover.Trigger>
         <RadixPopover.Content
           ref={refContent}
@@ -201,7 +202,7 @@ const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(
           align={alignment}
           side={position}
           sideOffset={distance}
-          portalled={!disablePortal} // some places in cbi-site need to pass this prop
+          portalled={!disablePortal}
           onEscapeKeyDown={onUserDismiss}
           onInteractOutside={onUserDismiss}
           avoidCollisions
